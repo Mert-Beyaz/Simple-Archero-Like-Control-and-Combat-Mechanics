@@ -1,49 +1,78 @@
 using UnityEngine;
 
-[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
-    public float moveSpeed = 5f;
-    public Joystick joystick;
-    public Transform firePoint;
-    public float attackInterval = 1f;
+    [Header("JoyStick")]
+    [SerializeField] private DynamicJoystick joystick;
 
-    private Rigidbody rb;
-    private Vector3 moveDirection;
+    [Header("Player")]
+    [SerializeField] private Rigidbody rb;
+    [SerializeField] private GameObject model;
+    [SerializeField] private float rotationSpeed = 10f;
+    [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Animator animator;
+
+    [Header("Combat")]
+    [SerializeField] private float attackInterval = 1f;
+    [SerializeField] private Transform firePoint;
+
+    [Header("Managers")]
+    [SerializeField] private TargetingSystem targetingSystem;
+    [SerializeField] private SkillManager skillManager;
+
+
     private float attackTimer;
-    private TargetingSystem targetingSystem;
-    private SkillManager skillManager;
+    private Vector3 _input;
+    private int _shoot = Animator.StringToHash("Shoot");
+    private int _idle = Animator.StringToHash("Idle");
+    private int _blendID = Animator.StringToHash("Walk");
 
-    void Start()
+    private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        targetingSystem = FindObjectOfType<TargetingSystem>();
-        skillManager = GetComponent<SkillManager>();
+        EventBroker.OnFirstTouch += OnFirstTouch;
+        animator.SetBool(_idle, true);
     }
 
-    void Update()
+    private void OnFirstTouch()
     {
-        moveDirection = new Vector3(joystick.Horizontal, 0, joystick.Vertical);
-        if (moveDirection.magnitude > 0.1f)
+        animator.SetBool(_idle, false);
+    }
+
+    void FixedUpdate()
+    {
+        if (Input.GetMouseButtonDown(0) && !GameManager.Instance.FirstInput) EventBroker.InvokeOnFirstTouch();
+
+        if (!GameManager.Instance.FirstInput)  return; 
+
+        _input = new Vector3(joystick.Horizontal, 0, joystick.Vertical);
+        float inputMagnitude = _input.magnitude;
+        if (inputMagnitude > 0.1f)
         {
             Move();
-            attackTimer = 0f; // reset timer when moving
+            animator.SetBool(_shoot, false);
+            animator.SetFloat(_blendID, inputMagnitude);
+            attackTimer = 0f; 
         }
         else
         {
             AttackIfReady();
+            animator.SetBool(_shoot, true);
         }
     }
 
     void Move()
     {
-        rb.velocity = moveDirection.normalized * moveSpeed;
-        transform.forward = moveDirection.normalized;
+        Vector3 direction = _input.normalized;
+        Vector3 move = direction * moveSpeed * Time.fixedDeltaTime;
+
+        rb.MovePosition(rb.position + move);
+
+        Quaternion toRotation = Quaternion.LookRotation(direction, Vector3.up);
+        model.transform.rotation = Quaternion.Slerp(model.transform.rotation, toRotation, rotationSpeed * Time.fixedDeltaTime);
     }
 
     void AttackIfReady()
     {
-        rb.velocity = Vector3.zero;
         attackTimer += Time.deltaTime;
 
         if (attackTimer >= attackInterval / skillManager.GetAttackSpeedMultiplier())
@@ -55,5 +84,10 @@ public class PlayerController : MonoBehaviour
                 ProjectileFactory.Create(firePoint.position, target.position, skillManager);
             }
         }
+    }
+
+    private void OnDisable()
+    {
+        EventBroker.OnFirstTouch -= OnFirstTouch;
     }
 }

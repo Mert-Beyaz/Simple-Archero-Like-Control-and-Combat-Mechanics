@@ -67,6 +67,11 @@ public class Pool : MonoBehaviour
         }
     }
 
+    public Queue<GameObject> GetAllObject(PoolType poolType)
+    {
+        return _poolDic[poolType];
+    }
+
     private void SetSubscriptions()
     {
        

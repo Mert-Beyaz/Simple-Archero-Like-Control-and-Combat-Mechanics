@@ -1,18 +1,24 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class UIManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public static UIManager Instance;
+
+    [SerializeField] private GameObject tutorial;
+
+
+    private void Awake()
     {
-        
+        Instance = this;
+        EventBroker.OnFirstTouch += OnFirstTouch;
+    }
+    private void OnFirstTouch()
+    {
+        tutorial.SetActive(false);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void OnDisable()
     {
-        
+        EventBroker.OnFirstTouch -= OnFirstTouch;
     }
 }

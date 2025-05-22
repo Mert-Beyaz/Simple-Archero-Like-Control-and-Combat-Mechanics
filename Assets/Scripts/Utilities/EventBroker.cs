@@ -18,6 +18,12 @@ public class EventBroker
     public static void InvokeOnPlay()
     {
         OnPlay?.Invoke();
+    } 
+    
+    public static event Action OnFirstTouch;
+    public static void InvokeOnFirstTouch()
+    {
+        OnFirstTouch?.Invoke();
     }
 
     public static event Action<int> OnNeonColorChange;
