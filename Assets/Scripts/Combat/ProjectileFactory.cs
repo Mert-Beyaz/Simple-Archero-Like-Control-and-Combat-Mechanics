@@ -1,15 +1,8 @@
-using UnityEngine;
+﻿using UnityEngine;
 
 public static class ProjectileFactory
 {
-    public static GameObject projectilePrefab;
-
-    public static void Initialize(GameObject prefab)
-    {
-        projectilePrefab = prefab;
-    }
-
-    public static void Create(Vector3 start, Vector3 target, SkillManager skillManager)
+    public static void Create(Vector3 start, Vector3 target, SkillManager skillManager) //burayı düzelt
     {
         var obj = Pool.Instance.GetObject(PoolType.Projectile);
         var proj = obj.GetComponent<Projectile>();
