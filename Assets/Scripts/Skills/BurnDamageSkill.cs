@@ -1,15 +1,16 @@
 public class BurnDamageSkill : ISkill
 {
+    public bool IsActive { get; private set; } = false;
+    public void Activate() => IsActive = true;
+    public void Deactivate() => IsActive = false;
+
     private float burnDuration = 3f;
     private float burnDamagePerSecond = 2f;
 
-    public BurnDamageSkill(bool isRageMode = false)
-    {
-        if (isRageMode) burnDuration = 6f;
-    }
 
-    public void Apply(Projectile projectile)
+    public void Apply(Projectile projectile, bool rageMode = false)
     {
-        //projectile.SetBurnEffect(burnDamagePerSecond, burnDuration);
+        if(rageMode) burnDuration = 6f;
+        projectile.SetBurnEffect(burnDamagePerSecond, burnDuration);
     }
 }

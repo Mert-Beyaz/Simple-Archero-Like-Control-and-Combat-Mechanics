@@ -1,14 +1,14 @@
 public class BounceDamageSkill : ISkill
 {
+    public bool IsActive { get; private set; } = false;
+    public void Activate() => IsActive = true;
+    public void Deactivate() => IsActive = false;
+
     private int bounceCount = 1;
 
-    public BounceDamageSkill(bool isRageMode = false)
+    public void Apply(Projectile projectile, bool rageMode = false)
     {
-        if (isRageMode) bounceCount = 2;
-    }
-
-    public void Apply(Projectile projectile)
-    {
+        if (rageMode) bounceCount = 2;
         //projectile.EnableBounce(bounceCount);
     }
 }

@@ -22,7 +22,7 @@ public class Enemy : MonoBehaviour
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
-            EnemyManager.Instance.Respawn(this);
+            EnemyManager.Instance.Respawn(this.gameObject);
         }
     }
 

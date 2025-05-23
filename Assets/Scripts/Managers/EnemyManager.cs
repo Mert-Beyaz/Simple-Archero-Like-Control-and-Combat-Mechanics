@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 public class EnemyManager : MonoBehaviour
@@ -30,9 +30,9 @@ public class EnemyManager : MonoBehaviour
         enemies.Add(obj.GetComponent<Enemy>());
     }
 
-    public void Respawn(Enemy enemy)
+    public void Respawn(GameObject enemy)
     {
-        Pool.Instance.ReturnObject(PoolType.Enemy, enemy.gameObject);
+        Pool.Instance.ReturnObject(PoolType.Enemy, enemy);
         SpawnEnemy();
     }
 }

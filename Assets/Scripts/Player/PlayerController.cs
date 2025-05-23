@@ -73,7 +73,7 @@ public class PlayerController : MonoBehaviour
 
     void AttackIfReady()
     {
-        attackTimer += Time.deltaTime;
+        attackTimer += Time.fixedDeltaTime;
 
         if (attackTimer >= attackInterval / skillManager.GetAttackSpeedMultiplier())
         {

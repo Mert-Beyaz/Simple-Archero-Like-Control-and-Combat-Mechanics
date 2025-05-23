@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Projectile : MonoBehaviour
@@ -9,10 +10,12 @@ public class Projectile : MonoBehaviour
     private Vector3 velocity;
     private Vector3 startPosition;
     private float time;
+    private 
 
-    void Start()
+    void OnEnable()
     {
         startPosition = transform.position;
+        StartCoroutine(Destroy());
     }
 
     public void Initialize(Vector3 velocity)
@@ -32,8 +35,21 @@ public class Projectile : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
+            StopCoroutine(Destroy());
             other.GetComponent<Enemy>().TakeDamage(damage);
-            Destroy(gameObject);
+            Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
         }
+    }
+
+    private IEnumerator Destroy()
+    {
+        yield return new WaitForSeconds(5);
+        Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
+    }
+
+    public void SetBurnEffect(float dps, float duration)
+    {
+        //    this.burnDPS = dps;
+        //    this.burnTimeRemaining = duration;
     }
 }

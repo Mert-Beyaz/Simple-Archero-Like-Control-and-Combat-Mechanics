@@ -8,16 +8,7 @@ public class TargetingSystem : MonoBehaviour
         List<GameObject> enemies = new List<GameObject>();
         Queue<GameObject> enemiesTemp = new Queue<GameObject>();
 
-        enemiesTemp = Pool.Instance.GetAllObject(PoolType.Enemy);
-        //aktif pool objelerini listeye ekle poolda
-
-        foreach (GameObject enemy in enemiesTemp)
-        {
-            if (enemy.activeSelf) enemies.Add(enemy);
-            Debug.LogError(enemy.activeSelf);
-        }
-
-        Debug.LogError(enemies.Count);
+        enemies = Pool.Instance.GetAllObject(PoolType.Enemy);
 
         float minDist = Mathf.Infinity;
         Transform nearest = null;
@@ -31,7 +22,6 @@ public class TargetingSystem : MonoBehaviour
                 nearest = enemy.transform;
             }
         }
-        Debug.LogError(nearest.position);
         return nearest;
     }
 }

@@ -9,6 +9,7 @@ public class Pool : MonoBehaviour
     [SerializeField] private int poolSize = 10;
 
     private Dictionary<PoolType, Queue<GameObject>> _poolDic = new Dictionary<PoolType, Queue<GameObject>>();
+    private List<PoolItem> allActiveObj  = new List<PoolItem>();
 
     private void Awake()
     {
@@ -55,7 +56,9 @@ public class Pool : MonoBehaviour
 
     public GameObject GetObject(PoolType _poolType)
     {
-        return GiveObject(_poolType);
+        var obj = GiveObject(_poolType);
+        allActiveObj.Add(NewPoolItem(_poolType, obj));
+        return obj;
     }
 
     public void ReturnObject(PoolType _poolType, GameObject obj)
@@ -63,13 +66,23 @@ public class Pool : MonoBehaviour
         if (_poolDic.TryGetValue(_poolType, out var queue))
         {
             _poolDic[_poolType].Enqueue(obj);
+            allActiveObj.Remove(NewPoolItem(_poolType, obj));
             obj.SetActive(false);
         }
     }
 
-    public Queue<GameObject> GetAllObject(PoolType poolType)
+    public List<GameObject> GetAllObject(PoolType poolType)
     {
-        return _poolDic[poolType];
+        return allActiveObj.Where(p => p.poolType == poolType)
+                .Select(p => p.obj).ToList();
+    }
+
+    private PoolItem NewPoolItem(PoolType _poolType, GameObject obj)
+    {
+        PoolItem a = new PoolItem();
+        a.poolType = _poolType;
+        a.obj = obj;
+        return a;
     }
 
     private void SetSubscriptions()
@@ -85,7 +98,6 @@ public class Pool : MonoBehaviour
     private void OnDisable()
     {
         SetUnsubscriptions();
-
     }
 }
 
@@ -93,6 +105,8 @@ public class Pool : MonoBehaviour
 public enum PoolType
 {
     Enemy,
+    Projectile,
+
 }
 
 [System.Serializable]

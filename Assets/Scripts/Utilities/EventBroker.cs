@@ -2,22 +2,10 @@ using System;
 
 public class EventBroker
 {
-    public static event Action OnChangeGameState;
-    public static void InvokeOnChangeGameState()
+    public static event Action OnShoot;
+    public static void InvokeOnShoot()
     {
-        OnChangeGameState?.Invoke();
-    }
-
-    public static event Action<int, int> OnPlay1;
-    public static void InvokeOnPlay1(int t, int s)
-    {
-        OnPlay1?.Invoke(t, s);
-    }    
-    
-    public static event Action OnPlay;
-    public static void InvokeOnPlay()
-    {
-        OnPlay?.Invoke();
+        OnShoot?.Invoke();
     } 
     
     public static event Action OnFirstTouch;
@@ -26,9 +14,27 @@ public class EventBroker
         OnFirstTouch?.Invoke();
     }
 
-    public static event Action<int> OnNeonColorChange;
-    public static void InvokeOnNeonColorChange(int t)
+    public static event Action<Type, bool> OnChangeSkill;
+    public static void InvokeOnOnChangeSkill(Type t, bool b)
     {
-        OnNeonColorChange?.Invoke(t);
+        OnChangeSkill?.Invoke(t, b);
     }
+
+    //public static event Action OnChangeGameState;
+    //public static void InvokeOnChangeGameState()
+    //{
+    //    OnChangeGameState?.Invoke();
+    //}
+
+    //public static event Action<int, int> OnPlay1;
+    //public static void InvokeOnPlay1(int t, int s)
+    //{
+    //    OnPlay1?.Invoke(t, s);
+    //}
+
+    //public static event Action<Type> On;
+    //public static void InvokeOn(Type t)
+    //{
+    //    On?.Invoke(t);
+    //}
 }
