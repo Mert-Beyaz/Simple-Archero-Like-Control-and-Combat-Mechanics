@@ -9,7 +9,7 @@ public class Pool : MonoBehaviour
     [SerializeField] private int poolSize = 10;
 
     private Dictionary<PoolType, Queue<GameObject>> _poolDic = new Dictionary<PoolType, Queue<GameObject>>();
-    private List<PoolItem> allActiveObj  = new List<PoolItem>();
+    private List<GameObject> allActiveObj  = new List<GameObject>();
 
     private void Awake()
     {
@@ -57,7 +57,8 @@ public class Pool : MonoBehaviour
     public GameObject GetObject(PoolType _poolType)
     {
         var obj = GiveObject(_poolType);
-        allActiveObj.Add(NewPoolItem(_poolType, obj));
+        if (_poolType == PoolType.Enemy && !allActiveObj.Contains(obj)) 
+            allActiveObj.Add(obj);
         return obj;
     }
 
@@ -66,23 +67,16 @@ public class Pool : MonoBehaviour
         if (_poolDic.TryGetValue(_poolType, out var queue))
         {
             _poolDic[_poolType].Enqueue(obj);
-            allActiveObj.Remove(NewPoolItem(_poolType, obj));
+            obj.transform.position = Vector3.zero;
+            obj.transform.rotation = Quaternion.identity;
             obj.SetActive(false);
         }
     }
 
-    public List<GameObject> GetAllObject(PoolType poolType)
+    public List<GameObject> GetAllEnemys()
     {
-        return allActiveObj.Where(p => p.poolType == poolType)
-                .Select(p => p.obj).ToList();
-    }
-
-    private PoolItem NewPoolItem(PoolType _poolType, GameObject obj)
-    {
-        PoolItem a = new PoolItem();
-        a.poolType = _poolType;
-        a.obj = obj;
-        return a;
+        return allActiveObj.Where(p => p.activeSelf)
+                .Select(p => p).ToList();
     }
 
     private void SetSubscriptions()

@@ -3,53 +3,62 @@ using UnityEngine;
 
 public class Projectile : MonoBehaviour
 {
-    public float speed = 20f;
-    public float gravity = 9.8f;
-    public float damage = 10f;
+    [SerializeField] private float damage = 10f;
+    [SerializeField] private float lifetime = 5f;
+    [SerializeField] private float speed = 10f;
 
-    private Vector3 velocity;
-    private Vector3 startPosition;
-    private float time;
-    private 
+    private Rigidbody rb;
+    private Coroutine destroyCoroutine;
 
-    void OnEnable()
+    public float Speed { get => speed; }
+
+    private void Awake()
     {
-        startPosition = transform.position;
-        StartCoroutine(Destroy());
+        rb = GetComponent<Rigidbody>();
     }
 
-    public void Initialize(Vector3 velocity)
+    private void OnEnable()
     {
-        this.velocity = velocity;
+        rb.velocity = Vector3.zero;
+        rb.angularVelocity = Vector3.zero;
+        rb.useGravity = true;
+
+        if (destroyCoroutine != null)
+            StopCoroutine(destroyCoroutine);
+        destroyCoroutine = StartCoroutine(DestroyAfterDelay());
     }
 
-    void Update()
+    public void Initialize(Vector3 launchVelocity)
     {
-        time += Time.deltaTime;
-        Vector3 displacement = velocity * time + 0.5f * Vector3.down * gravity * time * time;
-        transform.position = startPosition + displacement;
-        transform.forward = velocity;
+        rb.velocity = launchVelocity;
+        transform.forward = launchVelocity.normalized;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void FixedUpdate()
+    {
+        if (rb.velocity.sqrMagnitude > 0.01f)
+        {
+            transform.rotation = Quaternion.LookRotation(rb.velocity);
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Enemy"))
         {
-            StopCoroutine(Destroy());
-            other.GetComponent<Enemy>().TakeDamage(damage);
+            other.GetComponent<Enemy>()?.TakeDamage(damage);
             Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
         }
     }
 
-    private IEnumerator Destroy()
+    private IEnumerator DestroyAfterDelay()
     {
-        yield return new WaitForSeconds(5);
+        yield return new WaitForSeconds(lifetime);
         Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
     }
 
     public void SetBurnEffect(float dps, float duration)
     {
-        //    this.burnDPS = dps;
-        //    this.burnTimeRemaining = duration;
+        // Yanma efekti buraya
     }
 }

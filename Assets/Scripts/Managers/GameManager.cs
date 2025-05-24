@@ -7,6 +7,8 @@ public class GameManager : MonoBehaviour
     public GameState GameState = GameState.Idle_State;
     private bool _firstInput = false;
 
+    public float Speed = 10;
+
     public bool FirstInput { get => _firstInput; set => _firstInput = value; }
 
     private void Awake()

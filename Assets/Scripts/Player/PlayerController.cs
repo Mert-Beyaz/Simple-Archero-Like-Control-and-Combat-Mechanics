@@ -1,4 +1,6 @@
-using UnityEngine;
+﻿using UnityEngine;
+using DG.Tweening;
+using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,16 +22,19 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private TargetingSystem targetingSystem;
     [SerializeField] private SkillManager skillManager;
 
-
+    Transform _target = null;
     private float attackTimer;
+    private float _animationSpeed = 1;
     private Vector3 _input;
     private int _shoot = Animator.StringToHash("Shoot");
+    private int _attackSpeed = Animator.StringToHash("AttackSpeed");
     private int _idle = Animator.StringToHash("Idle");
     private int _blendID = Animator.StringToHash("Walk");
 
     private void Awake()
     {
         EventBroker.OnFirstTouch += OnFirstTouch;
+        EventBroker.OnShoot += OnShoot;
         animator.SetBool(_idle, true);
     }
 
@@ -50,13 +55,14 @@ public class PlayerController : MonoBehaviour
         {
             Move();
             animator.SetBool(_shoot, false);
+            animator.SetBool(_idle, false);
             animator.SetFloat(_blendID, inputMagnitude);
-            attackTimer = 0f; 
+            attackTimer = 0f;
         }
         else
         {
             AttackIfReady();
-            animator.SetBool(_shoot, true);
+            animator.SetBool(_idle, true);
         }
     }
 
@@ -74,20 +80,104 @@ public class PlayerController : MonoBehaviour
     void AttackIfReady()
     {
         attackTimer += Time.fixedDeltaTime;
-
-        if (attackTimer >= attackInterval / skillManager.GetAttackSpeedMultiplier())
+        float attackSpeed = skillManager.GetAttackSpeedMultiplier();
+        if (attackTimer >= attackInterval / attackSpeed)
         {
+            animator.SetBool(_shoot, true);
+            animator.SetFloat(_attackSpeed, _animationSpeed * attackSpeed);
             attackTimer = 0f;
-            Transform target = targetingSystem.GetNearestTarget(transform.position);
-            if (target != null)
+            _target = targetingSystem.GetNearestTarget(transform.position);
+            if (_target != null)
             {
-                ProjectileFactory.Create(firePoint.position, target.position, skillManager);
+                model.transform.DOLookAt(_target.position, 0.2f);
             }
         }
+    }
+
+    private void OnShoot()
+    {
+        ///////////////////////////////
+        // Trajectory'yi çiz
+        CalculateParabolicVelocity(firePoint.position, _target.position, 0.5f, out Vector3 velocity);
+        trajectoryDrawer.DrawTrajectory(firePoint.position, velocity, Physics.gravity.magnitude);
+
+        ///////////////////////////////
+        ProjectileFactory.Create(firePoint.position, _target.position, skillManager);
     }
 
     private void OnDisable()
     {
         EventBroker.OnFirstTouch -= OnFirstTouch;
+        EventBroker.OnShoot -= OnShoot;
     }
+
+
+#if UNITY_EDITOR
+    [SerializeField] private TrajectoryDrawer trajectoryDrawer;
+
+    //public static bool CalculateBallisticVelocity(Vector3 start, Vector3 end, float speed, out Vector3 velocity)
+    //{
+    //    velocity = Vector3.zero;
+
+    //    Vector3 toTarget = end - start;
+    //    Vector3 toTargetXZ = new Vector3(toTarget.x, 0, toTarget.z);
+    //    float y = toTarget.y;
+    //    float x = toTargetXZ.magnitude;
+    //    float g = Physics.gravity.magnitude;
+
+    //    float vSqr = speed * speed;
+    //    float underRoot = vSqr * vSqr - g * (g * x * x + 2 * y * vSqr);
+
+    //    if (underRoot < 0)
+    //    {
+    //        // Hedefe ulaşmak imkansız
+    //        return false;
+    //    }
+
+    //    float root = Mathf.Sqrt(underRoot);
+    //    float angleUp = Mathf.Atan((vSqr + root) / (g * x));
+    //    // float angleDown = Mathf.Atan((vSqr - root) / (g * x)); // alternatif alçak atış
+
+    //    Vector3 dir = toTargetXZ.normalized;
+    //    Quaternion rot = Quaternion.AngleAxis(Mathf.Rad2Deg * angleUp, Vector3.Cross(dir, Vector3.up));
+    //    velocity = rot * dir * speed;
+    //    return true;
+    //}
+
+    //private static Vector3 CalculateVelocityToReachInTime(Vector3 start, Vector3 target, float time)
+    //{
+    //    Vector3 displacement = target - start;
+    //    Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);
+    //    float vertical = displacement.y;
+    //    float gravity = Physics.gravity.y;
+
+    //    Vector3 velocity = horizontal / time;
+    //    velocity.y = (vertical - 0.5f * gravity * time * time) / time;
+
+    //    return velocity;
+    //}
+
+
+    private static bool CalculateParabolicVelocity(Vector3 start, Vector3 end, float time, out Vector3 velocity)
+    {
+        velocity = Vector3.zero;
+
+        Vector3 displacement = end - start;
+        Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);
+        float horizontalDistance = horizontal.magnitude;
+        float vertical = displacement.y;
+
+        Vector3 direction = horizontal.normalized;
+        float g = -Physics.gravity.y;
+
+        float vxz = horizontalDistance / time;
+        float vy = (vertical + 0.5f * g * time * time) / time;
+
+        velocity = direction * vxz;
+        velocity.y = vy;
+
+        return true;
+    }
+#endif
+
 }

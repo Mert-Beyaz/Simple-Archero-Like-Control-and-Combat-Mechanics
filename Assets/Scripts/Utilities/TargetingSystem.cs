@@ -8,7 +8,7 @@ public class TargetingSystem : MonoBehaviour
         List<GameObject> enemies = new List<GameObject>();
         Queue<GameObject> enemiesTemp = new Queue<GameObject>();
 
-        enemies = Pool.Instance.GetAllObject(PoolType.Enemy);
+        enemies = Pool.Instance.GetAllEnemys();
 
         float minDist = Mathf.Infinity;
         Transform nearest = null;
