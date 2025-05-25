@@ -7,7 +7,7 @@ public class EnemyManager : MonoBehaviour
     [SerializeField] int enemyCount = 5;
     [SerializeField] Vector2 mapSize = new Vector2(10, 10);
 
-    private List<Enemy> enemies = new List<Enemy>();
+    private List<Enemy> _enemies = new List<Enemy>();
 
     void Awake()
     {
@@ -27,7 +27,7 @@ public class EnemyManager : MonoBehaviour
         Vector3 pos = new Vector3(Random.Range(-mapSize.x, mapSize.x), 0, Random.Range(-mapSize.y, mapSize.y));
         var obj = Pool.Instance.GetObject(PoolType.Enemy);
         obj.transform.position = pos;
-        enemies.Add(obj.GetComponent<Enemy>());
+        _enemies.Add(obj.GetComponent<Enemy>());
     }
 
     public void Respawn(GameObject enemy)

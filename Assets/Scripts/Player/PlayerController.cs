@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using DG.Tweening;
-using Unity.VisualScripting;
 
 public class PlayerController : MonoBehaviour
 {
@@ -17,10 +16,6 @@ public class PlayerController : MonoBehaviour
     [Header("Combat")]
     [SerializeField] private float attackInterval = 1f;
     [SerializeField] private Transform firePoint;
-
-    [Header("Managers")]
-    [SerializeField] private TargetingSystem targetingSystem;
-    [SerializeField] private SkillManager skillManager;
 
     Transform _target = null;
     private float attackTimer;
@@ -80,13 +75,13 @@ public class PlayerController : MonoBehaviour
     void AttackIfReady()
     {
         attackTimer += Time.fixedDeltaTime;
-        float attackSpeed = skillManager.GetAttackSpeedMultiplier();
+        float attackSpeed = SkillManager.Instance.GetAttackSpeedMultiplier();
         if (attackTimer >= attackInterval / attackSpeed)
         {
             animator.SetBool(_shoot, true);
             animator.SetFloat(_attackSpeed, _animationSpeed * attackSpeed);
             attackTimer = 0f;
-            _target = targetingSystem.GetNearestTarget(transform.position);
+            _target = TargetingSystem.Instance.GetNearestTarget(transform.position);
             if (_target != null)
             {
                 model.transform.DOLookAt(_target.position, 0.2f);
@@ -98,11 +93,11 @@ public class PlayerController : MonoBehaviour
     {
         ///////////////////////////////
         // Trajectory'yi çiz
-        CalculateParabolicVelocity(firePoint.position, _target.position, 0.5f, out Vector3 velocity);
-        trajectoryDrawer.DrawTrajectory(firePoint.position, velocity, Physics.gravity.magnitude);
+        //CalculateParabolicVelocity(firePoint.position, _target.position, 0.5f, out Vector3 velocity);
+        //trajectoryDrawer.DrawTrajectory(firePoint.position, velocity, Physics.gravity.magnitude);
 
         ///////////////////////////////
-        ProjectileFactory.Create(firePoint.position, _target.position, skillManager);
+        ProjectileFactory.Create(firePoint.position, _target.position);
     }
 
     private void OnDisable()
@@ -115,47 +110,7 @@ public class PlayerController : MonoBehaviour
 #if UNITY_EDITOR
     [SerializeField] private TrajectoryDrawer trajectoryDrawer;
 
-    //public static bool CalculateBallisticVelocity(Vector3 start, Vector3 end, float speed, out Vector3 velocity)
-    //{
-    //    velocity = Vector3.zero;
 
-    //    Vector3 toTarget = end - start;
-    //    Vector3 toTargetXZ = new Vector3(toTarget.x, 0, toTarget.z);
-    //    float y = toTarget.y;
-    //    float x = toTargetXZ.magnitude;
-    //    float g = Physics.gravity.magnitude;
-
-    //    float vSqr = speed * speed;
-    //    float underRoot = vSqr * vSqr - g * (g * x * x + 2 * y * vSqr);
-
-    //    if (underRoot < 0)
-    //    {
-    //        // Hedefe ulaşmak imkansız
-    //        return false;
-    //    }
-
-    //    float root = Mathf.Sqrt(underRoot);
-    //    float angleUp = Mathf.Atan((vSqr + root) / (g * x));
-    //    // float angleDown = Mathf.Atan((vSqr - root) / (g * x)); // alternatif alçak atış
-
-    //    Vector3 dir = toTargetXZ.normalized;
-    //    Quaternion rot = Quaternion.AngleAxis(Mathf.Rad2Deg * angleUp, Vector3.Cross(dir, Vector3.up));
-    //    velocity = rot * dir * speed;
-    //    return true;
-    //}
-
-    //private static Vector3 CalculateVelocityToReachInTime(Vector3 start, Vector3 target, float time)
-    //{
-    //    Vector3 displacement = target - start;
-    //    Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);
-    //    float vertical = displacement.y;
-    //    float gravity = Physics.gravity.y;
-
-    //    Vector3 velocity = horizontal / time;
-    //    velocity.y = (vertical - 0.5f * gravity * time * time) / time;
-
-    //    return velocity;
-    //}
 
 
     private static bool CalculateParabolicVelocity(Vector3 start, Vector3 end, float time, out Vector3 velocity)

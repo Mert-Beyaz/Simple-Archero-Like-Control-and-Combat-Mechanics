@@ -9,7 +9,7 @@ public class Pool : MonoBehaviour
     [SerializeField] private int poolSize = 10;
 
     private Dictionary<PoolType, Queue<GameObject>> _poolDic = new Dictionary<PoolType, Queue<GameObject>>();
-    private List<GameObject> allActiveObj  = new List<GameObject>();
+    private List<GameObject> _allActiveObj  = new List<GameObject>();
 
     private void Awake()
     {
@@ -57,8 +57,8 @@ public class Pool : MonoBehaviour
     public GameObject GetObject(PoolType _poolType)
     {
         var obj = GiveObject(_poolType);
-        if (_poolType == PoolType.Enemy && !allActiveObj.Contains(obj)) 
-            allActiveObj.Add(obj);
+        if (_poolType == PoolType.Enemy && !_allActiveObj.Contains(obj)) 
+            _allActiveObj.Add(obj);
         return obj;
     }
 
@@ -75,7 +75,7 @@ public class Pool : MonoBehaviour
 
     public List<GameObject> GetAllEnemys()
     {
-        return allActiveObj.Where(p => p.activeSelf)
+        return _allActiveObj.Where(p => p.activeSelf)
                 .Select(p => p).ToList();
     }
 

@@ -2,27 +2,26 @@
 
 public static class ProjectileFactory
 {
-    public static void Create(Vector3 start, Vector3 target, SkillManager skillManager)
+    public static void Create(Vector3 start, Vector3 target)
     {
         GameObject obj = Pool.Instance.GetObject(PoolType.Projectile);
         Projectile proj = obj.GetComponent<Projectile>();
         obj.transform.position = start;
 
-        float flightTime = 0.5f;
-
-        if (!CalculateParabolicVelocity(start, target, flightTime, out Vector3 velocity))
+        if (!CalculateParabolicVelocity(start, target, out Vector3 velocity))
         {
             Debug.LogWarning("Velocity hesaplanamadı");
             return;
         }
 
         proj.Initialize(velocity);
-        skillManager.ApplySkills(proj);
+        SkillManager.Instance.ApplySkills(proj);
     }
 
-    private static bool CalculateParabolicVelocity(Vector3 start, Vector3 end, float time, out Vector3 velocity)
+    public static bool CalculateParabolicVelocity(Vector3 start, Vector3 end, out Vector3 velocity)
     {
         velocity = Vector3.zero;
+        float time = GameManager.Instance.ProjectileFlightTime;
 
         Vector3 displacement = end - start;
         Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);

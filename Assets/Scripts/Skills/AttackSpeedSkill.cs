@@ -4,8 +4,8 @@ public class AttackSpeedSkill : ISkill
     public void Activate() => IsActive = true;
     public void Deactivate() => IsActive = false;
 
+
     public void Apply(Projectile projectile, bool rageMode = false)
     {
-        
     }
 }

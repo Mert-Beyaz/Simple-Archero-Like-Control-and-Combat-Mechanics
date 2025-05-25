@@ -7,38 +7,43 @@ public class Projectile : MonoBehaviour
     [SerializeField] private float lifetime = 5f;
     [SerializeField] private float speed = 10f;
 
-    private Rigidbody rb;
-    private Coroutine destroyCoroutine;
+    private Rigidbody _rb;
+    private Coroutine _destroyCoroutine;
 
-    public float Speed { get => speed; }
+    //Burn Effect
+    private float _damagePerSecond = 0;
+    private float _burnDuration = 0;
+    //Bounce Effect
+    private int _remainingBounces = 0;
+    private bool _isBouncing = false;
+    private Enemy _lastHitEnemy = null;
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody>();
+        _rb = GetComponent<Rigidbody>();
     }
 
     private void OnEnable()
     {
-        rb.velocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.useGravity = true;
-
-        if (destroyCoroutine != null)
-            StopCoroutine(destroyCoroutine);
-        destroyCoroutine = StartCoroutine(DestroyAfterDelay());
+        ResetProjectile();
     }
 
     public void Initialize(Vector3 launchVelocity)
     {
-        rb.velocity = launchVelocity;
+        _rb.velocity = launchVelocity;
         transform.forward = launchVelocity.normalized;
+    }
+
+    public Vector3 GetVelocity()
+    {
+        return _rb.velocity;
     }
 
     private void FixedUpdate()
     {
-        if (rb.velocity.sqrMagnitude > 0.01f)
+        if (_rb.velocity.sqrMagnitude > 0.01f)
         {
-            transform.rotation = Quaternion.LookRotation(rb.velocity);
+            transform.rotation = Quaternion.LookRotation(_rb.velocity);
         }
     }
 
@@ -46,8 +51,31 @@ public class Projectile : MonoBehaviour
     {
         if (other.CompareTag("Enemy"))
         {
-            other.GetComponent<Enemy>()?.TakeDamage(damage);
-            Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
+            var enemy = other.GetComponent<Enemy>();
+            if (enemy != null && enemy != _lastHitEnemy)
+            {
+                enemy.TakeDamage(damage);
+                enemy.ApplyBurn(_damagePerSecond, _burnDuration);
+                _lastHitEnemy = enemy;
+
+                if (_isBouncing && _remainingBounces > 0)
+                {
+                    _remainingBounces--;
+                    Transform nextEnemy = TargetingSystem.Instance.GetNearestTarget(transform.position, true, enemy.gameObject);
+                    if (nextEnemy != null)
+                    {
+                        Vector3 nextTarget = nextEnemy.position;
+                        if (ProjectileFactory.CalculateParabolicVelocity(transform.position, nextTarget, out Vector3 velocity))
+                        {
+                            _rb.velocity = velocity;
+                            transform.forward = velocity.normalized;
+                            return;
+                        }
+                    }
+                }
+
+                Pool.Instance.ReturnObject(PoolType.Projectile, gameObject);
+            }
         }
     }
 
@@ -59,6 +87,31 @@ public class Projectile : MonoBehaviour
 
     public void SetBurnEffect(float dps, float duration)
     {
-        // Yanma efekti buraya
+        _damagePerSecond = dps;
+        _burnDuration = duration;
+    }
+
+    public void EnableBounce(int bounceCount)
+    {
+        _remainingBounces = bounceCount;
+        _isBouncing = true;
+    }
+
+    private void ResetProjectile()
+    {
+        _rb.velocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
+        _rb.useGravity = true;
+
+        _damagePerSecond = 0;
+        _burnDuration = 0;
+
+        _remainingBounces = 0;
+        _isBouncing = false;
+        _lastHitEnemy = null;
+
+        if (_destroyCoroutine != null)
+            StopCoroutine(_destroyCoroutine);
+        _destroyCoroutine = StartCoroutine(DestroyAfterDelay());
     }
 }

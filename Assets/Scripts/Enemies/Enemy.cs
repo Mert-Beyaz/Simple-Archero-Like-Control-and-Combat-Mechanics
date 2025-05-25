@@ -1,25 +1,36 @@
+using DG.Tweening;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour
 {
-    public float maxHealth = 100f;
-    private float currentHealth;
-    private float burnTimeRemaining;
-    private float burnDPS;
+    [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private float currentHealth;
+
+    [Header("HealtyBar")]
+    [SerializeField] private Image healthUI;
+    [SerializeField] private Image healtyEffectUI;
+
+    private float _burnTimeRemaining = 0;
+    private float _burnDamagePerSecond;
+    private Tween _healtyBarTween;
 
     void OnEnable()
     {
         SetHealth();
+        _burnTimeRemaining = 0;
     }
 
     public void SetHealth()
     {
         currentHealth = maxHealth;
+        HealtyBarAnim();
     }
 
     public void TakeDamage(float damage)
     {
         currentHealth -= damage;
+        HealtyBarAnim();
         if (currentHealth <= 0)
         {
             EnemyManager.Instance.Respawn(this.gameObject);
@@ -28,18 +39,26 @@ public class Enemy : MonoBehaviour
 
     public void ApplyBurn(float dps, float duration)
     {
-        burnDPS = dps;
-        burnTimeRemaining = duration;
+        _burnDamagePerSecond = dps;
+        _burnTimeRemaining += duration;
     }
 
     void Update()
     {
-        if (burnTimeRemaining > 0)
+        if (_burnTimeRemaining > 0)
         {
-            float burnThisFrame = burnDPS * Time.deltaTime;
+            float burnThisFrame = _burnDamagePerSecond * Time.deltaTime;
             TakeDamage(burnThisFrame);
-            burnTimeRemaining -= Time.deltaTime;
+            _burnTimeRemaining -= Time.deltaTime;
         }
+    }
+
+    private void HealtyBarAnim()
+    {
+        _healtyBarTween?.Kill();
+        float fillAmount = currentHealth / maxHealth;
+        healthUI.fillAmount = fillAmount;
+        _healtyBarTween = healtyEffectUI.DOFillAmount(fillAmount, 1);
     }
 
 }

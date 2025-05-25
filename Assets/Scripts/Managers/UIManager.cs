@@ -6,20 +6,22 @@ public class UIManager : MonoBehaviour
     public static UIManager Instance;
 
     [SerializeField] private GameObject tutorial;
-    [SerializeField] private GameObject SkillPanel;
+    [SerializeField] private GameObject skillPanel;
 
     [Header("BUTTON")]
-    [SerializeField] private Button SkillBtn;
-    [SerializeField] private Button AttackSpeedBtn;
-    [SerializeField] private Button BounceDamageBtn;
-    [SerializeField] private Button BurnDamageBtn;
-    [SerializeField] private Button ArrowMultiplicationBtn;
+    [SerializeField] private Button skillBtn;
+    [SerializeField] private Button attackSpeedBtn;
+    [SerializeField] private Button bounceDamageBtn;
+    [SerializeField] private Button burnDamageBtn;
+    [SerializeField] private Button arrowMultiplicationBtn;
+    [SerializeField] private Button rageModeBtn;
 
 
-    private bool IsAttackSpeed = false;
-    private bool IsBounceDamage = false;
-    private bool IsBurnDamage = false;
-    private bool IsArrowMultiplication = false;
+    private bool _isAttackSpeed = false;
+    private bool _isBounceDamage = false;
+    private bool _isBurnDamage = false;
+    private bool _isArrowMultiplication = false;
+    private bool _isRageMode = false;
 
     private void Awake()
     {
@@ -30,25 +32,27 @@ public class UIManager : MonoBehaviour
     private void SetSubscriptions()
     {
         EventBroker.OnFirstTouch += OnFirstTouch;
-        SkillBtn.onClick.AddListener(SetSkillPanel);
-        AttackSpeedBtn.onClick.AddListener(AttackSpeed);
-        BounceDamageBtn.onClick.AddListener(BounceDamage);
-        BurnDamageBtn.onClick.AddListener(BurnDamage);
-        ArrowMultiplicationBtn.onClick.AddListener(ArrowMultiplication);
+        skillBtn.onClick.AddListener(SetSkillPanel);
+        attackSpeedBtn.onClick.AddListener(AttackSpeed);
+        bounceDamageBtn.onClick.AddListener(BounceDamage);
+        burnDamageBtn.onClick.AddListener(BurnDamage);
+        arrowMultiplicationBtn.onClick.AddListener(ArrowMultiplication);
+        rageModeBtn.onClick.AddListener(RageMode);
     }
 
     private void SetUnsubscriptions()
     {
         EventBroker.OnFirstTouch -= OnFirstTouch;
-        AttackSpeedBtn.onClick.RemoveListener(AttackSpeed);
-        BounceDamageBtn.onClick.RemoveListener(BounceDamage);
-        BurnDamageBtn.onClick.RemoveListener(BurnDamage);
-        ArrowMultiplicationBtn.onClick.RemoveListener(ArrowMultiplication);
+        attackSpeedBtn.onClick.RemoveListener(AttackSpeed);
+        bounceDamageBtn.onClick.RemoveListener(BounceDamage);
+        burnDamageBtn.onClick.RemoveListener(BurnDamage);
+        arrowMultiplicationBtn.onClick.RemoveListener(ArrowMultiplication);
+        rageModeBtn.onClick.RemoveListener(RageMode);
     }
 
     private void SetSkillPanel()
     {
-        SkillPanel.SetActive(!SkillPanel.activeSelf);
+        skillPanel.SetActive(!skillPanel.activeSelf);
     }
 
     private void OnFirstTouch()
@@ -58,27 +62,33 @@ public class UIManager : MonoBehaviour
 
     private void AttackSpeed()
     {
-        Debug.Log("AttackSpeed");
-        IsAttackSpeed = !IsAttackSpeed;
-        EventBroker.InvokeOnOnChangeSkill(typeof(AttackSpeedSkill), IsAttackSpeed);
+        _isAttackSpeed = !_isAttackSpeed;
+        Debug.Log("AttackSpeed = " + _isAttackSpeed);
+        EventBroker.InvokeOnOnChangeSkill(typeof(AttackSpeedSkill), _isAttackSpeed);
     }  
     private void BounceDamage()
     {
-        Debug.Log("BounceDamage");
-        IsBounceDamage = !IsBounceDamage;
-        EventBroker.InvokeOnOnChangeSkill(typeof(BounceDamageSkill), IsBounceDamage);
+        _isBounceDamage = !_isBounceDamage;
+        Debug.Log("BounceDamage = " + _isBounceDamage);
+        EventBroker.InvokeOnOnChangeSkill(typeof(BounceDamageSkill), _isBounceDamage);
     }
     private void BurnDamage()
     {
-        Debug.Log("BurnDamage");
-        IsBurnDamage = !IsBurnDamage;
-        EventBroker.InvokeOnOnChangeSkill(typeof(BurnDamageSkill), IsBurnDamage);
+        _isBurnDamage = !_isBurnDamage;
+        Debug.Log("BurnDamage = " + _isBurnDamage);
+        EventBroker.InvokeOnOnChangeSkill(typeof(BurnDamageSkill), _isBurnDamage);
     }
     private void ArrowMultiplication()
     {
-        Debug.Log("ArrowMultiplication");
-        IsArrowMultiplication = !IsArrowMultiplication;
-        EventBroker.InvokeOnOnChangeSkill(typeof(ArrowMultiplicationSkill), IsArrowMultiplication);
+        _isArrowMultiplication = !_isArrowMultiplication;
+        Debug.Log("ArrowMultiplication = " + _isArrowMultiplication);
+        EventBroker.InvokeOnOnChangeSkill(typeof(ArrowMultiplicationSkill), _isArrowMultiplication);
+    }
+    private void RageMode()
+    {
+        _isRageMode = !_isRageMode;
+        Debug.Log("ArrowMultiplication = " + _isRageMode);
+        EventBroker.InvokeOnOnChangeSkill(typeof(RageModeSkill), _isRageMode);
     }
 
 

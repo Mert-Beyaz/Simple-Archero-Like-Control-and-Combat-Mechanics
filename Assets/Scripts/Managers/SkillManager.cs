@@ -5,17 +5,22 @@ using UnityEngine;
 
 public class SkillManager : MonoBehaviour
 {
-    private List<ISkill> activeSkills = new List<ISkill>();
-    public bool rageMode = false;
+    public static SkillManager Instance;
+    private List<ISkill> _activeSkills = new List<ISkill>();
+    private Dictionary<Type, ISkill> _skills = new();
+    private bool _rageMode = false;
 
-    private Dictionary<Type, ISkill> skills = new();
+
+    public bool RageMode { get => _rageMode; set => _rageMode = value; }
 
     void Awake()
     {
-        skills[typeof(AttackSpeedSkill)] = new AttackSpeedSkill();
-        skills[typeof(BurnDamageSkill)] = new BurnDamageSkill();
-        skills[typeof(BounceDamageSkill)] = new BounceDamageSkill();
-        skills[typeof(ArrowMultiplicationSkill)] = new ArrowMultiplicationSkill();
+        Instance = this;
+        _skills[typeof(RageModeSkill)] = new RageModeSkill();
+        _skills[typeof(AttackSpeedSkill)] = new AttackSpeedSkill();
+        _skills[typeof(BurnDamageSkill)] = new BurnDamageSkill();
+        _skills[typeof(BounceDamageSkill)] = new BounceDamageSkill();
+        _skills[typeof(ArrowMultiplicationSkill)] = new ArrowMultiplicationSkill();
     }
     private void OnEnable()
     {
@@ -24,47 +29,46 @@ public class SkillManager : MonoBehaviour
 
     private void ActivateSkill(ISkill skill)
     {
-        if (!activeSkills.Contains(skill))
+        if (!_activeSkills.Contains(skill))
         {
-            activeSkills.Add(skill);
+            _activeSkills.Add(skill);
         }
     }
 
     private void DeactivateSkill(ISkill skill)
     {
-        if (activeSkills.Contains(skill))
+        if (_activeSkills.Contains(skill))
         {
-            activeSkills.Remove(skill);
+            _activeSkills.Remove(skill);
         }
     }
 
     public void ApplySkills(Projectile projectile)
     {
-        foreach (var skill in activeSkills)
+        foreach (var skill in _activeSkills)
         {
-            skill.Apply(projectile);
+            skill.Apply(projectile, _rageMode);
         }
+    }
 
-        if (rageMode)
+    public void ApplySkillsExcept<T>(Projectile projectile, bool rageMode = false) where T : ISkill
+    {
+        foreach (var skill in _activeSkills)
         {
-            foreach (var skill in activeSkills)
-            {
-                //if (skill is ArrowMultiplicationSkill) new ArrowMultiplicationSkill(true).Apply(projectile);
-                //if (skill is BounceDamageSkill) new BounceDamageSkill(true).Apply(projectile);
-                //if (skill is BurnDamageSkill) new BurnDamageSkill(true).Apply(projectile);
-            }
+            if (skill is T) continue;
+            skill.Apply(projectile, rageMode);
         }
     }
 
     public float GetAttackSpeedMultiplier()
     {
-        bool attackSpeedActive = activeSkills.OfType<AttackSpeedSkill>().FirstOrDefault()?.IsActive == true;
-        return rageMode && attackSpeedActive ? 4f : attackSpeedActive ? 2f : 1f;
+        bool attackSpeedActive = _activeSkills.OfType<AttackSpeedSkill>().FirstOrDefault()?.IsActive == true;
+        return _rageMode && attackSpeedActive ? 4f : attackSpeedActive ? 2f : 1f;
     }
 
     private void ChangeSkill(Type type, bool isActive)
     {
-        ISkill skill = skills[type];
+        ISkill skill = _skills[type];
         if (isActive) 
         { 
             skill.Activate();
