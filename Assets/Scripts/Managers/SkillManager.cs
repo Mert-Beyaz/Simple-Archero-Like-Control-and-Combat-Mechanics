@@ -66,10 +66,10 @@ public class SkillManager : MonoBehaviour
         return _rageMode && attackSpeedActive ? 4f : attackSpeedActive ? 2f : 1f;
     }
 
-    private void ChangeSkill(Type type, bool isActive)
+    private void ChangeSkill((Type type, bool isActive) item)
     {
-        ISkill skill = _skills[type];
-        if (isActive) 
+        ISkill skill = _skills[item.type];
+        if (item.isActive) 
         { 
             skill.Activate();
             ActivateSkill(skill);
@@ -83,12 +83,12 @@ public class SkillManager : MonoBehaviour
 
     private void SetSubscriptions()
     {
-        EventBroker.OnChangeSkill += ChangeSkill;
+        EventBroker.Subscribe<(Type, bool)>("OnChangeSkill", ChangeSkill);
     }
 
     private void SetUnsubscriptions()
     {
-        EventBroker.OnChangeSkill -= ChangeSkill;
+        EventBroker.UnSubscribe<(Type, bool)>("OnChangeSkill", ChangeSkill);
     }
 
     private void OnDestroy()

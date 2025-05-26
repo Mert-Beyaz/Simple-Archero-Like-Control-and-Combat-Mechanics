@@ -28,8 +28,8 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        EventBroker.OnFirstTouch += OnFirstTouch;
-        EventBroker.OnShoot += OnShoot;
+        EventBroker.Subscribe("OnFirstTouch", OnFirstTouch);
+        EventBroker.Subscribe("OnShoot", OnShoot);
         animator.SetBool(_idle, true);
     }
 
@@ -40,7 +40,7 @@ public class PlayerController : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (Input.GetMouseButtonDown(0) && !GameManager.Instance.FirstInput) EventBroker.InvokeOnFirstTouch();
+        if (Input.GetMouseButtonDown(0) && !GameManager.Instance.FirstInput) EventBroker.Publish("OnFirstTouch");
 
         if (!GameManager.Instance.FirstInput)  return; 
 
@@ -52,7 +52,7 @@ public class PlayerController : MonoBehaviour
             animator.SetBool(_shoot, false);
             animator.SetBool(_idle, false);
             animator.SetFloat(_blendID, inputMagnitude);
-            attackTimer = 0f;
+            attackTimer = attackInterval;
         }
         else
         {
@@ -91,48 +91,12 @@ public class PlayerController : MonoBehaviour
 
     private void OnShoot()
     {
-        ///////////////////////////////
-        // Trajectory'yi çiz
-        //CalculateParabolicVelocity(firePoint.position, _target.position, 0.5f, out Vector3 velocity);
-        //trajectoryDrawer.DrawTrajectory(firePoint.position, velocity, Physics.gravity.magnitude);
-
-        ///////////////////////////////
         ProjectileFactory.Create(firePoint.position, _target.position);
     }
 
     private void OnDisable()
     {
-        EventBroker.OnFirstTouch -= OnFirstTouch;
-        EventBroker.OnShoot -= OnShoot;
+        EventBroker.UnSubscribe("OnFirstTouch", OnFirstTouch);
+        EventBroker.UnSubscribe("OnShoot", OnShoot);
     }
-
-
-#if UNITY_EDITOR
-    [SerializeField] private TrajectoryDrawer trajectoryDrawer;
-
-
-
-
-    private static bool CalculateParabolicVelocity(Vector3 start, Vector3 end, float time, out Vector3 velocity)
-    {
-        velocity = Vector3.zero;
-
-        Vector3 displacement = end - start;
-        Vector3 horizontal = new Vector3(displacement.x, 0, displacement.z);
-        float horizontalDistance = horizontal.magnitude;
-        float vertical = displacement.y;
-
-        Vector3 direction = horizontal.normalized;
-        float g = -Physics.gravity.y;
-
-        float vxz = horizontalDistance / time;
-        float vy = (vertical + 0.5f * g * time * time) / time;
-
-        velocity = direction * vxz;
-        velocity.y = vy;
-
-        return true;
-    }
-#endif
-
 }

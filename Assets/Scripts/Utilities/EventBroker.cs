@@ -1,40 +1,74 @@
 using System;
+using System.Collections.Generic;
 
-public class EventBroker
+public static class EventBroker
 {
-    public static event Action OnShoot;
-    public static void InvokeOnShoot()
+    private static readonly Dictionary<string, List<Action>> actionList = new();
+    private static readonly Dictionary<string, List<Action<object>>> actionTList = new();
+
+    public static void Subscribe(string key, Action action)
     {
-        OnShoot?.Invoke();
-    } 
-    
-    public static event Action OnFirstTouch;
-    public static void InvokeOnFirstTouch()
-    {
-        OnFirstTouch?.Invoke();
+        if (!actionList.ContainsKey(key))
+            actionList[key] = new List<Action>();
+
+        actionList[key].Add(action);
     }
 
-    public static event Action<Type, bool> OnChangeSkill;
-    public static void InvokeOnOnChangeSkill(Type t, bool b)
+    public static void Subscribe<T>(string key, Action<T> action)
     {
-        OnChangeSkill?.Invoke(t, b);
+        if (!actionTList.ContainsKey(key))
+            actionTList[key] = new List<Action<object>>();
+
+        Action<object> actionWrapper = obj => action((T)obj);
+        actionTList[key].Add(actionWrapper);
     }
 
-    //public static event Action OnChangeGameState;
-    //public static void InvokeOnChangeGameState()
-    //{
-    //    OnChangeGameState?.Invoke();
-    //}
+    public static void UnSubscribe(string key, Action action)
+    {
+        if (actionList.ContainsKey(key))
+        {
+            actionList[key].Remove(action);
+            if (actionList[key].Count == 0)
+            {
+                actionList.Remove(key);
+            }
+        }
 
-    //public static event Action<int, int> OnPlay1;
-    //public static void InvokeOnPlay1(int t, int s)
-    //{
-    //    OnPlay1?.Invoke(t, s);
-    //}
+    }
 
-    //public static event Action<Type> On;
-    //public static void InvokeOn(Type t)
-    //{
-    //    On?.Invoke(t);
-    //}
+    public static void UnSubscribe<T>(string key, Action<T> action)
+    {
+        if (actionTList.ContainsKey(key))
+        {
+            Action<object> actionWrapper = obj => action((T)obj);
+            actionTList[key].Remove(actionWrapper);
+            if (actionTList[key].Count == 0)
+            {
+                actionTList.Remove(key);
+            }
+        }
+    }
+
+    public static void Publish(string key)
+    {
+        if (!actionList.ContainsKey(key))
+            return;
+
+        foreach (var action in actionList[key])
+        {
+            action();
+        }
+       
+    }
+
+    public static void Publish<T>(string key, T eventMessage)
+    {
+        if (actionTList.ContainsKey(key))
+        {
+            foreach (var action in actionTList[key])
+            {
+                action(eventMessage);
+            }
+        }
+    }
 }

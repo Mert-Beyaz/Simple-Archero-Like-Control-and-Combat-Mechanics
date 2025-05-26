@@ -4,9 +4,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance;
-    public GameState GameState = GameState.Idle_State;
     private bool _firstInput = false;
-
     private float _projectileFlightTime = 0.5f;
 
     public bool FirstInput { get => _firstInput; set => _firstInput = value; }
@@ -15,12 +13,7 @@ public class GameManager : MonoBehaviour
     private void Awake()
     {
         Instance = this;
-        EventBroker.OnFirstTouch += OnFirstTouch;
-    }
-
-    private void OnPlay()
-    {
-        GameState = GameState.Walk_State;
+        EventBroker.Subscribe("OnFirstTouch", OnFirstTouch);
     }
 
     private void OnFirstTouch()
@@ -29,13 +22,9 @@ public class GameManager : MonoBehaviour
     }
 
 
-  
+    private void OnDisable()
+    {
+        EventBroker.UnSubscribe("OnFirstTouch", OnFirstTouch);
+    }
 
-}
-
-public enum GameState
-{
-    Idle_State,
-    Walk_State,
-    Shoot_State
 }

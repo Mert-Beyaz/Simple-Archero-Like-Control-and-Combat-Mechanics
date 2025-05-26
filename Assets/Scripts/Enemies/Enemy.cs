@@ -7,6 +7,9 @@ public class Enemy : MonoBehaviour
     [SerializeField] private float maxHealth = 100f;
     [SerializeField] private float currentHealth;
 
+    [SerializeField] private ParticleSystem spawnParticle;
+    [SerializeField] private ParticleSystem burnParticle;
+
     [Header("HealtyBar")]
     [SerializeField] private Image healthUI;
     [SerializeField] private Image healtyEffectUI;
@@ -19,6 +22,7 @@ public class Enemy : MonoBehaviour
     {
         SetHealth();
         _burnTimeRemaining = 0;
+        spawnParticle.Play();
     }
 
     public void SetHealth()
@@ -50,7 +54,9 @@ public class Enemy : MonoBehaviour
             float burnThisFrame = _burnDamagePerSecond * Time.deltaTime;
             TakeDamage(burnThisFrame);
             _burnTimeRemaining -= Time.deltaTime;
+            if (!burnParticle.isPlaying) burnParticle.Play();
         }
+        else burnParticle.Stop();
     }
 
     private void HealtyBarAnim()

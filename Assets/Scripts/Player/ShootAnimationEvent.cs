@@ -5,6 +5,6 @@ public class ShootAnimationEvent : MonoBehaviour
 {
     public void OnShoot()
     {
-        EventBroker.InvokeOnShoot();
+        EventBroker.Publish("OnShoot");
     }
 }

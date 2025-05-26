@@ -5,7 +5,6 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] private float damage = 10f;
     [SerializeField] private float lifetime = 5f;
-    [SerializeField] private float speed = 10f;
 
     private Rigidbody _rb;
     private Coroutine _destroyCoroutine;
