@@ -16,6 +16,7 @@ public class PlayerController : MonoBehaviour
     [Header("Combat")]
     [SerializeField] private float attackInterval = 1f;
     [SerializeField] private Transform firePoint;
+    [SerializeField] private AudioSource shootSound;
 
     Transform _target = null;
     private float attackTimer;
@@ -92,6 +93,7 @@ public class PlayerController : MonoBehaviour
     private void OnShoot()
     {
         ProjectileFactory.Create(firePoint.position, _target.position);
+        shootSound.Play();
     }
 
     private void OnDisable()
