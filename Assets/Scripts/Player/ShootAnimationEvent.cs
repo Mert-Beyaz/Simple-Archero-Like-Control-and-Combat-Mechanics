@@ -1,10 +1,13 @@
 
 using UnityEngine;
 
-public class ShootAnimationEvent : MonoBehaviour
+namespace Archero
 {
-    public void OnShoot()
+    public class ShootAnimationEvent : MonoBehaviour
     {
-        EventBroker.Publish("OnShoot");
+        public void OnShoot()
+        {
+            EventBroker.Publish("OnShoot");
+        }
     }
 }

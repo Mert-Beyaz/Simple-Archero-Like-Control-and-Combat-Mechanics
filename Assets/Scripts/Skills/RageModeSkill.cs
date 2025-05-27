@@ -1,21 +1,24 @@
-public class RageModeSkill : ISkill
+namespace Archero
 {
-    public bool IsActive { get; private set; } = false;
-
-    public void Activate()
+    public class RageModeSkill : ISkill
     {
-        IsActive = true;
-        SkillManager.Instance.RageMode = true;
-    }
+        public bool IsActive { get; private set; } = false;
 
-    public void Deactivate()
-    {
-        IsActive = false;
-        SkillManager.Instance.RageMode = false;
-    }
+        public void Activate()
+        {
+            IsActive = true;
+            SkillManager.Instance.RageMode = true;
+        }
 
-    public void Apply(Projectile projectile, bool rageMode = false)
-    {
-       
+        public void Deactivate()
+        {
+            IsActive = false;
+            SkillManager.Instance.RageMode = false;
+        }
+
+        public void Apply(Projectile projectile, bool rageMode = false)
+        {
+
+        }
     }
 }
