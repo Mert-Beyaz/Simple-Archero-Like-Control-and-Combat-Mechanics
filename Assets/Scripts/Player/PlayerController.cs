@@ -20,7 +20,7 @@ namespace Archero
         [SerializeField] private Transform firePoint;
         [SerializeField] private AudioSource shootSound;
 
-        Transform _target = null;
+        private Transform _target = null;
         private float attackTimer;
         private float _animationSpeed = 1;
         private Vector3 _input;
