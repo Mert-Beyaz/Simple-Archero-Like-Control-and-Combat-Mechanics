@@ -20,7 +20,6 @@ public class Pool : MonoBehaviour
     public void Initialize()
     {
         FillPool();
-        SetSubscriptions();
     }
 
     private void FillPool()
@@ -77,21 +76,6 @@ public class Pool : MonoBehaviour
     {
         return _allActiveObj.Where(p => p.activeSelf)
                 .Select(p => p).ToList();
-    }
-
-    private void SetSubscriptions()
-    {
-       
-    }
-
-    private void SetUnsubscriptions()
-    {
-        
-    }
-
-    private void OnDisable()
-    {
-        SetUnsubscriptions();
     }
 }
 
